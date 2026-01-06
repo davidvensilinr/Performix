@@ -12,3 +12,13 @@
  }
 
  Now we have to setup for navigation bar below the title so that users could navigate through the pages they would like to visit
+
+ The navbar is created as a component in the component file
+
+ Let's import the navbar to the home page now 
+
+ Steps -> {
+    import Navbar from "./components/Navbar" -> we are importing the Navbar function that was exported in that file
+
+    <Navbar/> - we are directing code to render the navbar code here  
+ }
