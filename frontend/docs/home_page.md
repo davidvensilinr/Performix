@@ -10,3 +10,5 @@
     size - 4xl -> text-4xl
     padding 4px -> p-4
  }
+
+ Now we have to setup for navigation bar below the title so that users could navigate through the pages they would like to visit
