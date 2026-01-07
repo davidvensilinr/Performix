@@ -19,4 +19,12 @@ Steps ->{
 
     **nav** -> to indicate these particular elements inside for specifically for navigation
 
+    nav -> class{
+        flex justify-between items-center -> {
+            flex : makes the direct children to be laid horizontally
+            justify-between:spaces the direct children equally , first child at the start(left most) and last child at the end(right most)
+            items-center:aligns the direct children vertically in the center
+        }
+    }
+
 }
