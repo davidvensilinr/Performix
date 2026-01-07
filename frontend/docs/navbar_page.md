@@ -28,3 +28,8 @@ Steps ->{
     }
 
 }
+
+**Link** - for redirecting to different pages{
+    import Link from 'next/link'
+    why not <a> -> <a> triggers a full page reload , but link only reloads the components that are different from the current and next page
+}
