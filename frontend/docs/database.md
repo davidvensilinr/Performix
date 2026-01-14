@@ -14,3 +14,8 @@ create table organisation(
     name VARCHAR(1000) NOT NULL,
     managed_by VARCHAR(500) NOT NULL
 )
+
+incase if any table name has to be changed then the query that could be used
+(
+alter table organisation rename column created_by to managed_by
+)
