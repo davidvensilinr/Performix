@@ -1,0 +1,1 @@
+We are gonna use Supabase for database, authentication,storage and other features
