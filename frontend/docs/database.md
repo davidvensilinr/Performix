@@ -19,3 +19,6 @@ incase if any table name has to be changed then the query that could be used
 (
 alter table organisation rename column created_by to managed_by
 )
+
+Now let's add some data to the table:
+Query : INSERT INTO ORGANISATION (name,managed_by) VALUES ('Bazinga','Vijay')
