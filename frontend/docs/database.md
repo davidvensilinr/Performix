@@ -22,3 +22,5 @@ alter table organisation rename column created_by to managed_by
 
 Now let's add some data to the table:
 Query : INSERT INTO ORGANISATION (name,managed_by) VALUES ('Bazinga','Vijay')
+
+Now we need an util program to help us with fetching the data from the sql database and show it in the frontend for which we will create a file lib/db/org.ts
