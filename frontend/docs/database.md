@@ -24,3 +24,17 @@ Now let's add some data to the table:
 Query : INSERT INTO ORGANISATION (name,managed_by) VALUES ('Bazinga','Vijay')
 
 Now we need an util program to help us with fetching the data from the sql database and show it in the frontend for which we will create a file lib/db/org.ts
+
+Normal Query for fetching data from the table:
+Query : SELECT * FROM organisation
+
+Working of fetching data from the table:
+Frontend (Next Js)
+     ↓ fetch()
+API Route (Next.js server)
+     ↓ calls
+Utility Function (lib/db)
+     ↓ uses
+Prisma Client (lib/prisma.ts)
+     ↓ via adapter
+PostgreSQL (Supabase)

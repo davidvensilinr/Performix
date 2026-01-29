@@ -17,6 +17,11 @@ export default function Analysis(){
         <h1 className=" text-white font-serif font-bold text-2xl w-full text-center">Select to View Analysis of your Organisation</h1></div>
         <table>
             <tbody>
+            <tr>
+                <th>Organisation Name</th>
+                <th>Managed By</th>
+                <th>Visit</th>
+            </tr>
             {organisation.map((o:any)=>(
                 <Org key={o.id} name={o.name} managed_by={o.managed_by}/>
             ))}
