@@ -1,10 +1,14 @@
+"use client"
 import Navbar from "@/app/components/Navbar"
 import Org from "@/app/components/org"
+import {useEffect,useState} from "react"
 export default function Analysis(){
-    const data =[
-        {id:1,name:"fdf",managed_by:"fdf"},
-        {id:2,name:"fdfd",managed_by:"dsnfj"}
-    ];
+    const [organisation,setOrganisation] = useState([]);
+    useEffect(()=>{
+        fetch("/api/organisation")
+        .then(res=>res.json())
+        .then(data=>setOrganisation(data));
+    },[]);
     return(
         <div>
         <Navbar/>
@@ -13,8 +17,8 @@ export default function Analysis(){
         <h1 className=" text-white font-serif font-bold text-2xl w-full text-center">Select to View Analysis of your Organisation</h1></div>
         <table>
             <tbody>
-            {data.map(d=>(
-                <Org key={d.id} name={d.name} managed_by={d.managed_by}/>
+            {organisation.map((o:any)=>(
+                <Org key={o.id} name={o.name} managed_by={o.managed_by}/>
             ))}
             
             </tbody>
