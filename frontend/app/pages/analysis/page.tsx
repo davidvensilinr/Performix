@@ -1,4 +1,5 @@
 "use client"
+import CreateOrg from "@/app/components/CreateOrg";
 import Navbar from "@/app/components/Navbar"
 import Org from "@/app/components/org"
 import {useEffect,useState} from "react"
@@ -6,14 +7,24 @@ export default function Analysis(){
     const [organisation,setOrganisation] = useState([]);
     useEffect(()=>{
         fetch("/api/organisation")
-        .then(res=>res.json())
-        .then(data=>setOrganisation(data));
+        .then(res=>{
+            if (!res.ok) {
+                throw new Error(`HTTP error! status: ${res.status}`);
+            }
+            return res.json();
+        })
+        .then(data=>setOrganisation(data))
+        .catch(error=>{
+            console.error("Failed to fetch organisations:", error);
+            setOrganisation([]);
+        });
     },[]);
     return(
         <div>
         <Navbar/>
         <div className="flex flex-col items-center justify-center gap-4">
         <button className="bg-white w-1/2 h-1/2 rounded-full font-mono font-bold hover:bg-gray-300 transition duration-500 p-2 text-xl">Add your Organisation +</button>
+        <CreateOrg/>
         <h1 className=" text-white font-serif font-bold text-2xl w-full text-center">Select to View Analysis of your Organisation</h1></div>
         <table>
             <tbody>
