@@ -11,3 +11,7 @@ Now let's import the database model from supabase :
 Step 1: make sure to have the postgresql link in .env file
 
 Step 2: npx prisma db pull-> pulls the schema of the tables and creates as models
+
+For adding a new value to the database:
+
+first we have to make a async function in our lib folder to create a entry using Prisma ORM and then have a api to handle our request from the frontend
