@@ -35,7 +35,7 @@ export default function Analysis(){
                 <th>Visit</th>
             </tr>
             {organisation.map((o:any)=>(
-                <Org key={o.id} name={o.name} managed_by={o.managed_by}/>
+                <Org key={o.id} id={o.id} name={o.name} managed_by={o.managed_by}/>
             ))}
             
             </tbody>

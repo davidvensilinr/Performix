@@ -16,6 +16,7 @@ export async function POST(req:Request){
     try{
         const data = await req.json();
         const newOrg= await addOrganisation({
+            id:data.id,
             name: data.name,
             managed_by:data.managed_by
         });
