@@ -38,3 +38,16 @@ Utility Function (lib/db)
 Prisma Client (lib/prisma.ts)
      ↓ via adapter
 PostgreSQL (Supabase)
+
+
+now we have a table to keep track of each employee referenced to their company's primary key :
+create table employees(
+  emp_id serial primary key,
+  emp_name varchar(100) not null,
+  orgId int ,
+  tasks int,
+  deadline_met int ,
+  averagetime int,
+
+  foreign key (orgId) references  organisation(id)
+);
