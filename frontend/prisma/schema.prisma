@@ -5,11 +5,21 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 model organisation {
-  id         Int    @id @default(autoincrement())
-  name       String @db.VarChar(500)
-  managed_by String @db.VarChar(100)
+  id         Int         @id @default(autoincrement())
+  name       String      @db.VarChar(500)
+  managed_by String      @db.VarChar(100)
+  employees  employees[]
+}
+
+model employees {
+  emp_id       Int           @id @default(autoincrement())
+  emp_name     String        @db.VarChar(100)
+  orgid        Int?
+  tasks        Int?
+  deadline_met Int?
+  averagetime  Int?
+  organisation organisation? @relation(fields: [orgid], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
