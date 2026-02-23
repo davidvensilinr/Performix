@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@/app/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import pg from "pg";
 
@@ -10,7 +10,6 @@ const adapter = new PrismaPg(
     max: 5,
     idleTimeoutMillis: 10000,
     connectionTimeoutMillis: 5000,
-    socketTimeoutMillis: 10000,
   })
 );
 
