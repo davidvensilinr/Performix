@@ -140,7 +140,13 @@ export default function MLAnalysisModal({ employee, isGuest, onMetricsSaved, onC
                     past_overtime:      fields.past_overtime ? 1 : 0,
                 }),
             });
-            if (!res.ok) throw new Error();
+            if (!res.ok) {
+                const data = await res.json().catch(() => ({}));
+                if (data.error === "ml_timeout") {
+                    throw new Error("timeout");
+                }
+                throw new Error("unavailable");
+            }
             const data = await res.json();
             setResult({
                 productivity: data.productivity,
@@ -153,8 +159,13 @@ export default function MLAnalysisModal({ employee, isGuest, onMetricsSaved, onC
 
             // Auto-save metrics to DB (or guest store)
             await saveMetrics();
-        } catch {
-            setError("ML backend is offline. Run:  uvicorn main:app --reload  (inside /backend)");
+        } catch (err: unknown) {
+            const msg = err instanceof Error ? err.message : "";
+            if (msg === "timeout") {
+                setError("The ML service is waking up (Render cold start). Wait 15 seconds and try again.");
+            } else {
+                setError("ML backend is offline. Run:  uvicorn main:app --reload  (inside /backend)");
+            }
         } finally {
             setLoading(false);
         }
