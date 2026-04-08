@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-const ML_API = process.env.ML_API_URL ?? "http://localhost:8000";
+const ML_API = (process.env.ML_API_URL ?? "http://localhost:8000").replace(/\/$/, "");
 
 export async function GET() {
     return NextResponse.json({
