@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 const ML_API = process.env.ML_API_URL ?? "http://localhost:8000";
 
 export async function POST(req: Request) {
+    console.log("[ml/analyse] ML_API_URL =", ML_API);
     try {
         const body = await req.json();
 
