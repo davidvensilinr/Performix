@@ -1,43 +1,49 @@
 import { NextResponse } from "next/server";
-import { getAllOrganisation } from "@/lib/db/org";
-import {addOrganisation} from "@/lib/db/org";
+import { getAllOrganisation, addOrganisation } from "@/lib/db/org";
+import { createClient } from "@/lib/supabase/server";
+import { ensureTables } from "@/lib/db/ensureTables";
 
-export async function GET(){
+export async function GET(req: Request) {
     try {
-        console.log("Attempting to fetch organisations...");
-        const organisation = await getAllOrganisation();
-        console.log("Successfully fetched organisations:", organisation);
-        return NextResponse.json(organisation);
+        await ensureTables();
+        const supabase = await createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (!user) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
+        const organisations = await getAllOrganisation(user.id);
+        return NextResponse.json(organisations);
     } catch (error) {
-        console.error("Database connection failed, using fallback data:", {
-            message: error instanceof Error ? error.message : 'Unknown error',
-            code: (error as any)?.code
-        });
-        
-        // Fallback mock data for development
-        const mockOrganisations = [
-            { id: 1, name: "Tech Corp", managed_by: "John Doe" },
-            { id: 2, name: "Design Studio", managed_by: "Jane Smith" },
-            { id: 3, name: "Marketing Agency", managed_by: "Mike Johnson" }
-        ];
-        
-        return NextResponse.json(mockOrganisations);
+        console.error("DB error fetching organisations:", error);
+        return NextResponse.json({ error: "db_unavailable" }, { status: 503 });
     }
 }
 
-export async function POST(req:Request){
-    try{
-        console.log("Attempting to create new organisation...");
-        const data = await req.json();
-        const newOrg= await addOrganisation({
-            name: data.name,
-            managed_by:data.managed_by
-        });
-        return NextResponse.json(newOrg,{status:201});
-    }
-    catch(error){
-        console.log(error);
-        return NextResponse.json({error:"Failed to create"},{status:500});
-    }
+export async function POST(req: Request) {
+    try {
+        await ensureTables();
+        const supabase = await createClient();
+        const { data: { user } } = await supabase.auth.getUser();
 
+        if (!user) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
+        const data = await req.json();
+        if (!data.name || !data.managed_by) {
+            return NextResponse.json({ error: "name and managed_by are required" }, { status: 400 });
+        }
+
+        const newOrg = await addOrganisation({
+            name: data.name,
+            managed_by: data.managed_by,
+            user_id: user.id,
+        });
+        return NextResponse.json(newOrg, { status: 201 });
+    } catch (error) {
+        console.error("DB error creating organisation:", error);
+        return NextResponse.json({ error: "db_unavailable" }, { status: 503 });
+    }
 }

@@ -11,15 +11,30 @@ model organisation {
   id         Int         @id @default(autoincrement())
   name       String      @db.VarChar(500)
   managed_by String      @db.VarChar(100)
+  user_id    String?     @db.VarChar(255)
   employees  employees[]
 }
 
 model employees {
-  emp_id       Int           @id @default(autoincrement())
-  emp_name     String        @db.VarChar(100)
-  orgid        Int?
-  tasks        Int?
-  deadline_met Int?
-  averagetime  Int?
-  organisation organisation? @relation(fields: [orgid], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  emp_id             Int           @id @default(autoincrement())
+  emp_name           String        @db.VarChar(100)
+  orgid              Int?
+  // basic metrics
+  tasks              Int?
+  deadline_met       Int?
+  averagetime        Int?
+  // ml metrics
+  performance_score  Int?
+  attendance_percent Float?
+  late_days          Int?
+  projects_completed Int?
+  complaints         Int?
+  skills_score       Int?
+  experience_years   Float?
+  leadership_score   Int?
+  workload           Int?
+  deadline_pressure  Int?
+  job_satisfaction   Int?
+  past_overtime      Boolean?
+  organisation       organisation? @relation(fields: [orgid], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }

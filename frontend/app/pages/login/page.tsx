@@ -1,6 +1,40 @@
+"use client";
+
 import Navbar from "../../components/Navbar";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
+import Link from "next/link";
 
 export default function Login() {
+    const router = useRouter();
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+
+    const handleLogin = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError("");
+        setLoading(true);
+
+        try {
+            const supabase = createClient();
+            const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
+
+            if (authError) {
+                setError(authError.message);
+            } else {
+                router.push("/pages/analysis");
+                router.refresh();
+            }
+        } catch {
+            setError("Something went wrong. Please try again.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-gray-50/50 flex flex-col">
             <Navbar />
@@ -8,12 +42,15 @@ export default function Login() {
                 <div className="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
                     <div className="p-8">
                         <h1 className="text-center pb-6 text-3xl font-bold text-gray-800 tracking-tight">Welcome Back</h1>
-                        <form className="space-y-6">
+                        <form onSubmit={handleLogin} className="space-y-6">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
                                 <input
                                     type="email"
+                                    value={email}
+                                    onChange={e => setEmail(e.target.value)}
                                     placeholder="Enter your email"
+                                    required
                                     className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#7825ff] focus:border-transparent outline-none transition-all"
                                 />
                             </div>
@@ -21,22 +58,37 @@ export default function Login() {
                                 <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
                                 <input
                                     type="password"
+                                    value={password}
+                                    onChange={e => setPassword(e.target.value)}
                                     placeholder="Enter your password"
+                                    required
                                     className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#7825ff] focus:border-transparent outline-none transition-all"
                                 />
                             </div>
-                            <button className="w-full py-3 px-4 bg-[#7825ff] hover:bg-[#6c20e8] text-white font-bold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5">
-                                Login
+
+                            {error && (
+                                <p className="text-red-500 text-sm text-center">{error}</p>
+                            )}
+
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className="w-full py-3 px-4 bg-[#7825ff] hover:bg-[#6c20e8] text-white font-bold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
+                            >
+                                {loading ? "Logging in..." : "Login"}
                             </button>
                         </form>
                     </div>
                     <div className="bg-gray-50 px-8 py-4 text-center border-t border-gray-100">
                         <p className="text-sm text-gray-600">
-                            Don't have an account? <span className="text-[#7825ff] font-semibold cursor-pointer hover:underline">Sign up</span>
+                            Don&apos;t have an account?{" "}
+                            <Link href="/pages/signup" className="text-[#7825ff] font-semibold hover:underline">
+                                Sign up
+                            </Link>
                         </p>
                     </div>
                 </div>
             </div>
         </div>
-    )
+    );
 }
