@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Navbar from "@/app/components/Navbar";
 import DBErrorPopup from "@/app/components/DBErrorPopup";
@@ -248,15 +248,15 @@ function EmployeeDetailModal({ employee, onClose }: { employee: Employee; onClos
 }
 
 // ─── Employee Card ────────────────────────────────────────────────────────────
-function EmployeeCard({ employee, onView, onEdit, onAnalyse }: {
+function EmployeeCard({ employee, onEdit, onAnalyse }: {
     employee: Employee;
-    onView: () => void;
     onEdit: () => void;
     onAnalyse: () => void;
 }) {
+    const router = useRouter();
     return (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition-all duration-200">
-            <div className="flex items-center gap-3 mb-4 cursor-pointer" onClick={onView}>
+            <div className="flex items-center gap-3 mb-4 cursor-pointer" onClick={() => router.push(`/pages/employee/${employee.emp_id}`)}>
                 <div className="w-11 h-11 rounded-xl bg-[#7825ff]/10 flex items-center justify-center flex-shrink-0">
                     <span className="text-lg font-bold text-[#7825ff]">{employee.emp_name.charAt(0).toUpperCase()}</span>
                 </div>
@@ -265,7 +265,7 @@ function EmployeeCard({ employee, onView, onEdit, onAnalyse }: {
                     <p className="text-xs text-gray-400 mt-0.5">ID #{employee.emp_id}</p>
                 </div>
             </div>
-            <div className="grid grid-cols-3 gap-2 mb-4 cursor-pointer" onClick={onView}>
+            <div className="grid grid-cols-3 gap-2 mb-4 cursor-pointer" onClick={() => router.push(`/pages/employee/${employee.emp_id}`)}>
                 <div className="text-center p-2 bg-[#7825ff]/5 rounded-xl">
                     <p className="text-lg font-bold text-[#7825ff]">{employee.tasks ?? "—"}</p>
                     <p className="text-xs text-gray-500 mt-0.5">Tasks</p>
@@ -280,9 +280,9 @@ function EmployeeCard({ employee, onView, onEdit, onAnalyse }: {
                 </div>
             </div>
             <div className="grid grid-cols-3 gap-1.5">
-                <button onClick={onView}
+                <button onClick={() => router.push(`/pages/employee/${employee.emp_id}`)}
                     className="py-1.5 text-xs text-[#7825ff] border border-[#7825ff]/20 rounded-lg hover:bg-[#7825ff]/5 transition-colors font-medium">
-                    View
+                    Dashboard
                 </button>
                 <button onClick={onEdit}
                     className="py-1.5 text-xs text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors font-medium">
@@ -306,7 +306,6 @@ export default function OrganisationDashboard() {
     const [orgName, setOrgName] = useState("");
     const [loading, setLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
-    const [viewEmployee, setViewEmployee] = useState<Employee | null>(null);
     const [editEmployee, setEditEmployee] = useState<Employee | null>(null);
     const [analysingEmployee, setAnalysingEmployee] = useState<Employee | null>(null);
     const [dbError, setDbError] = useState(false);
@@ -393,7 +392,6 @@ export default function OrganisationDashboard() {
 
     const handleEmployeeUpdated = (updated: Employee) => {
         setEmployees(prev => prev.map(e => e.emp_id === updated.emp_id ? updated : e));
-        if (viewEmployee?.emp_id === updated.emp_id) setViewEmployee(updated);
         if (analysingEmployee?.emp_id === updated.emp_id) setAnalysingEmployee(updated);
     };
 
@@ -473,7 +471,6 @@ export default function OrganisationDashboard() {
                             <EmployeeCard
                                 key={emp.emp_id}
                                 employee={emp}
-                                onView={() => setViewEmployee(emp)}
                                 onEdit={() => setEditEmployee(emp)}
                                 onAnalyse={() => setAnalysingEmployee(emp)}
                             />
@@ -482,9 +479,6 @@ export default function OrganisationDashboard() {
                 )}
             </div>
 
-            {viewEmployee && (
-                <EmployeeDetailModal employee={viewEmployee} onClose={() => setViewEmployee(null)} />
-            )}
             {editEmployee && (
                 <EditEmployeeModal
                     employee={editEmployee}

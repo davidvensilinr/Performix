@@ -11,6 +11,55 @@ type MLResult = {
     promotion:    { label: string; confidence: number | null };
 };
 
+// Model metadata — what model was used and which metrics it consumed
+const MODEL_META: Record<keyof MLResult, {
+    model: string;
+    metrics: string[];
+    advice: Record<string, string>;
+}> = {
+    performance: {
+        model: "K-Nearest Neighbours (KNN)",
+        metrics: ["Performance Score", "Attendance %", "Projects Completed", "Skills Score", "Experience"],
+        advice: {
+            "High":   "Excellent performance tier. Keep up the consistency and consider mentoring others.",
+            "Medium": "Solid performer. Focus on skills development and increasing project output.",
+            "Low":    "Performance needs improvement. Consider targeted training and closer support.",
+        },
+    },
+    productivity: {
+        model: "Logistic Regression",
+        metrics: ["Avg Time per Task", "Deadlines Met", "Tasks Completed"],
+        advice: {
+            "Productive":     "Strong productivity. Task completion rate and time management are on point.",
+            "Not Productive": "Productivity is below expectations. Review workload balance and time allocation.",
+        },
+    },
+    promotion: {
+        model: "Decision Tree",
+        metrics: ["Performance Score", "Attendance %", "Projects Completed", "Skills Score", "Experience", "Leadership Score"],
+        advice: {
+            "Promotion Ready": "This employee meets the criteria for promotion. Consider advancing their role.",
+            "Not Ready":       "Not yet ready for promotion. Focus on leadership development and project delivery.",
+        },
+    },
+    firing_risk: {
+        model: "Logistic Regression",
+        metrics: ["Performance Score", "Attendance %", "Late Days", "Projects Completed", "Complaints"],
+        advice: {
+            "At Risk": "High risk of termination. Immediate performance review and support plan recommended.",
+            "Stable":  "Employee is stable. No immediate concerns based on current metrics.",
+        },
+    },
+    overtime: {
+        model: "Gaussian Naive Bayes",
+        metrics: ["Performance Score", "Workload", "Deadline Pressure", "Job Satisfaction", "Experience", "Past Overtime"],
+        advice: {
+            "Overtime Likely": "Overtime is likely needed. Monitor workload and ensure adequate compensation.",
+            "No Overtime":     "Current workload is manageable. No overtime expected under present conditions.",
+        },
+    },
+};
+
 type Props = {
     employee: Employee;
     isGuest: boolean;
@@ -41,23 +90,57 @@ function ConfidenceBar({ value }: { value: number | null }) {
     if (value === null) return null;
     const color = value >= 70 ? "#22c55e" : value >= 40 ? "#f59e0b" : "#ef4444";
     return (
-        <div className="flex items-center gap-2 mt-1.5">
+        <div className="flex items-center gap-2 mt-2">
+            <span className="text-xs text-gray-400 w-16 shrink-0">Confidence</span>
             <div className="flex-1 bg-gray-100 rounded-full h-1.5 overflow-hidden">
                 <div className="h-1.5 rounded-full transition-all duration-700" style={{ width: `${value}%`, backgroundColor: color }} />
             </div>
-            <span className="text-xs text-gray-400 w-10 text-right">{value}%</span>
+            <span className="text-xs font-semibold w-10 text-right" style={{ color }}>{value}%</span>
         </div>
     );
 }
 
-function ResultRow({ title, label, confidence }: { title: string; label: string; confidence?: number | null }) {
+function ResultCard({ title, resultKey, label, confidence }: {
+    title: string;
+    resultKey: keyof MLResult;
+    label: string;
+    confidence?: number | null;
+}) {
+    const meta = MODEL_META[resultKey];
+    const advice = meta.advice[label] ?? "Review this metric with the employee.";
+    const isPositive = ["Productive", "Stable", "Promotion Ready", "No Overtime", "High", "Medium"].includes(label);
+
     return (
-        <div className="p-4 bg-gray-50 rounded-xl">
-            <div className="flex items-center justify-between">
-                <span className="text-sm font-semibold text-gray-700">{title}</span>
+        <div className="border border-gray-100 rounded-xl overflow-hidden">
+            {/* Top bar */}
+            <div className="flex items-center justify-between px-4 py-3 bg-gray-50 border-b border-gray-100">
+                <span className="text-sm font-bold text-gray-800">{title}</span>
                 <Badge label={label} />
             </div>
-            {confidence !== undefined && <ConfidenceBar value={confidence ?? null} />}
+            <div className="p-4 space-y-3">
+                {/* Model used */}
+                <div className="flex items-start gap-2">
+                    <span className="text-xs text-gray-400 w-20 shrink-0 pt-0.5">Model</span>
+                    <span className="text-xs font-medium text-gray-600">{meta.model}</span>
+                </div>
+                {/* Metrics used */}
+                <div className="flex items-start gap-2">
+                    <span className="text-xs text-gray-400 w-20 shrink-0 pt-0.5">Inputs</span>
+                    <div className="flex flex-wrap gap-1">
+                        {meta.metrics.map(m => (
+                            <span key={m} className="px-2 py-0.5 bg-[#7825ff]/8 text-[#7825ff] text-xs rounded-md font-medium">{m}</span>
+                        ))}
+                    </div>
+                </div>
+                {/* Confidence */}
+                {confidence !== undefined && confidence !== null && (
+                    <ConfidenceBar value={confidence} />
+                )}
+                {/* Advice line */}
+                <div className={`text-xs rounded-lg px-3 py-2 leading-relaxed ${isPositive ? "bg-green-50 text-green-700" : "bg-amber-50 text-amber-700"}`}>
+                    {advice}
+                </div>
+            </div>
         </div>
     );
 }
@@ -279,11 +362,11 @@ export default function MLAnalysisModal({ employee, isGuest, onMetricsSaved, onC
                         <>
                             {saving && <p className="text-xs text-gray-400 mb-3 text-center">Saving metrics...</p>}
                             <div className="space-y-3">
-                                <ResultRow title="Performance Tier"  label={result.performance.label} />
-                                <ResultRow title="Productivity"      label={result.productivity.label} confidence={result.productivity.confidence} />
-                                <ResultRow title="Promotion"         label={result.promotion.label}    confidence={result.promotion.confidence} />
-                                <ResultRow title="Firing Risk"       label={result.firing_risk.label}  confidence={result.firing_risk.confidence} />
-                                <ResultRow title="Overtime Forecast" label={result.overtime.label}     confidence={result.overtime.confidence} />
+                                <ResultCard title="Performance Tier"  resultKey="performance"  label={result.performance.label} />
+                                <ResultCard title="Productivity"      resultKey="productivity"  label={result.productivity.label} confidence={result.productivity.confidence} />
+                                <ResultCard title="Promotion"         resultKey="promotion"     label={result.promotion.label}    confidence={result.promotion.confidence} />
+                                <ResultCard title="Firing Risk"       resultKey="firing_risk"   label={result.firing_risk.label}  confidence={result.firing_risk.confidence} />
+                                <ResultCard title="Overtime Forecast" resultKey="overtime"      label={result.overtime.label}     confidence={result.overtime.confidence} />
                             </div>
                             <button onClick={() => { setStep("form"); setResult(null); }}
                                 className="mt-5 w-full py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl transition-all text-sm">
