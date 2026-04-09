@@ -4,7 +4,6 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Navbar from "@/app/components/Navbar";
 import DBErrorPopup from "@/app/components/DBErrorPopup";
-import MLAnalysisModal from "@/app/components/MLAnalysisModal";
 import { createClient } from "@/lib/supabase/client";
 import { useGuestStore } from "@/lib/useGuestStore";
 import Link from "next/link";
@@ -248,10 +247,9 @@ function EmployeeDetailModal({ employee, onClose }: { employee: Employee; onClos
 }
 
 // ─── Employee Card ────────────────────────────────────────────────────────────
-function EmployeeCard({ employee, onEdit, onAnalyse }: {
+function EmployeeCard({ employee, onEdit }: {
     employee: Employee;
     onEdit: () => void;
-    onAnalyse: () => void;
 }) {
     const router = useRouter();
     return (
@@ -288,7 +286,7 @@ function EmployeeCard({ employee, onEdit, onAnalyse }: {
                     className="py-1.5 text-xs text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors font-medium">
                     Edit
                 </button>
-                <button onClick={onAnalyse}
+                <button onClick={() => router.push(`/pages/employee/${employee.emp_id}/analyse`)}
                     className="py-1.5 text-xs bg-[#7825ff] text-white rounded-lg hover:bg-[#6c20e8] transition-colors font-medium">
                     Analyse
                 </button>
@@ -307,7 +305,6 @@ export default function OrganisationDashboard() {
     const [loading, setLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
     const [editEmployee, setEditEmployee] = useState<Employee | null>(null);
-    const [analysingEmployee, setAnalysingEmployee] = useState<Employee | null>(null);
     const [dbError, setDbError] = useState(false);
     const [isGuest, setIsGuest] = useState(false);
 
@@ -392,7 +389,6 @@ export default function OrganisationDashboard() {
 
     const handleEmployeeUpdated = (updated: Employee) => {
         setEmployees(prev => prev.map(e => e.emp_id === updated.emp_id ? updated : e));
-        if (analysingEmployee?.emp_id === updated.emp_id) setAnalysingEmployee(updated);
     };
 
     return (
@@ -472,7 +468,6 @@ export default function OrganisationDashboard() {
                                 key={emp.emp_id}
                                 employee={emp}
                                 onEdit={() => setEditEmployee(emp)}
-                                onAnalyse={() => setAnalysingEmployee(emp)}
                             />
                         ))}
                     </div>
@@ -485,14 +480,6 @@ export default function OrganisationDashboard() {
                     isGuest={isGuest}
                     onSave={handleEmployeeUpdated}
                     onClose={() => setEditEmployee(null)}
-                />
-            )}
-            {analysingEmployee && (
-                <MLAnalysisModal
-                    employee={analysingEmployee}
-                    isGuest={isGuest}
-                    onMetricsSaved={handleEmployeeUpdated}
-                    onClose={() => setAnalysingEmployee(null)}
                 />
             )}
             {dbError && <DBErrorPopup onClose={() => setDbError(false)} />}
